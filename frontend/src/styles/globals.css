@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom global styles */
+body {
+  @apply bg-gradient-to-r from-indigo-50 to-purple-50 min-h-screen;
+  font-family: 'Inter', sans-serif;
+}
+
+.container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+}
+
+.btn-secondary {
+  @apply bg-transparent hover:bg-purple-500 text-purple-500 hover:text-white font-bold py-3 px-6 rounded-lg border border-purple-500 hover:border-transparent transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50;
+}
+
+/* Card styles */
+.feature-card {
+  @apply shadow-lg p-6 bg-white bg-opacity-80 backdrop-filter backdrop-blur-lg rounded-2xl hover:scale-105 transition-transform duration-300;
+}
+
+/* Animation classes */
+.fade-in {
+  @apply opacity-0;
+}
+
+.fade-in.active {
+  @apply opacity-100 transition-opacity duration-1000;
+}

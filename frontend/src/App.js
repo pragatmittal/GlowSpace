@@ -1,20 +1,18 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import Navbar from './components/layout/Navbar';
-import './styles/App.css';
+import Navbar from './components/Navbar';
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-        </Routes>
-      </div>
-    </Router>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        {/* Add more routes here */}
+      </Routes>
+    </div>
   );
 }
 
-export default App; 
+export default App;

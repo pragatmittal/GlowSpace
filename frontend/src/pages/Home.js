@@ -1,18 +1,37 @@
 import React from 'react';
+import HeroSection from '../components/Home/HeroSection';
+import ServicesSection from '../components/Home/ServicesSection';
+import PositiveStreakSection from '../components/Home/PositiveStreakSection';
+import HowItWorksSection from '../components/Home/HowItWorksSection';
+import HealingConnectSection from '../components/Home/HealingConnectSection';
+import GetConnectedSection from '../components/Home/GetConnectedSection';
+import Footer from '../components/Footer';
 
 const Home = () => {
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Welcome to GlowSpace
-        </h1>
-        <p className="text-xl text-gray-600">
-          Connect with friends and share your moments!
-        </p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
+      {/* Hero section comes after navbar */}
+      <HeroSection />
+      
+      {/* Services section */}
+      <ServicesSection />
+      
+      {/* Positive streak container */}
+      <PositiveStreakSection />
+      
+      {/* How it works */}
+      <HowItWorksSection />
+      
+      {/* Healing connect */}
+      <HealingConnectSection />
+      
+      {/* Get connected with us */}
+      <GetConnectedSection />
+      
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
 
-export default Home; 
+export default Home;
