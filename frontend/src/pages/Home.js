@@ -6,10 +6,11 @@ import HowItWorksSection from '../components/Home/HowItWorksSection';
 import HealingConnectSection from '../components/Home/HealingConnectSection';
 import GetConnectedSection from '../components/Home/GetConnectedSection';
 import Footer from '../components/Footer';
+import TestimonialSection from '../components/TestimonialSection';
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
+    <div className="home-container">
       {/* Hero section comes after navbar */}
       <HeroSection />
       
@@ -21,6 +22,9 @@ const Home = () => {
       
       {/* How it works */}
       <HowItWorksSection />
+      
+      {/* Add the TestimonialSection after How it Works */}
+      <TestimonialSection />
       
       {/* Healing connect */}
       <HealingConnectSection />
