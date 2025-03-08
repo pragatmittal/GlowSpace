@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Navbar from './components/Navbar';
 import { findNestedRouters } from './utils/findRouterComponents';
+import SignIn from './pages/auth/SignIn';
 
 // Define a layout component that includes the Navbar
 const Layout = ({ children }) => {
@@ -25,6 +26,16 @@ const router = createBrowserRouter([
         <Home />
       </Layout>
     ),
+  },
+  // Redirect from /login to /auth/sign-in
+  {
+    path: "/login",
+    element: <Navigate to="/auth/sign-in" replace />,
+  },
+  // Sign-in route
+  {
+    path: "/auth/sign-in",
+    element: <SignIn />,
   },
   // Add more routes here as needed
 ], {
