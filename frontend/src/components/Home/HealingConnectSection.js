@@ -1,6 +1,11 @@
 import React from 'react';
+import { fallbackImage } from '../../assets/images/placeholder';
 
 const HealingConnectSection = () => {
+  const handleImageError = (e) => {
+    e.currentTarget.src = fallbackImage(600, 400);
+  };
+
   return (
     <section className="py-16 px-4 md:px-8 lg:px-16 bg-white">
       <div className="max-w-7xl mx-auto">
@@ -12,10 +17,7 @@ const HealingConnectSection = () => {
               src="/images/healing-connect.jpg" 
               alt="People connecting and healing together" 
               className="rounded-xl shadow-lg w-full h-auto"
-              onError={({ currentTarget }) => {
-                currentTarget.onerror = null;
-                currentTarget.src = "https://via.placeholder.com/600x400?text=Healing+Connect";
-              }}
+              onError={handleImageError}
             />
           </div>
           

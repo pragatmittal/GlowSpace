@@ -6,6 +6,7 @@ import { findNestedRouters } from './utils/findRouterComponents';
 import SignIn from './pages/auth/SignIn';
 import SignUp from './pages/auth/SignUp';
 import ForgotPassword from './pages/auth/ForgotPassword';
+import Dashboard from './pages/Dashboard';
 import { LoadingProvider } from './context/LoadingContext';
 import LoadingScreen from './components/LoadingScreen';
 
@@ -68,6 +69,16 @@ const router = createBrowserRouter([
   {
     path: "/auth/forgotpassword",
     element: withLoadingProvider(ForgotPassword)(),
+  },
+  // Dashboard route
+  {
+    path: "/dashboard",
+    element: <Dashboard />,
+  },
+  // Dashboard sub-routes
+  {
+    path: "/dashboard/:section",
+    element: <Dashboard />,
   },
   // Add more routes here as needed
 ], {

@@ -1,6 +1,11 @@
 import React from 'react';
+import { fallbackImage } from '../../assets/images/placeholder';
 
 const GetConnectedSection = () => {
+  const handleImageError = (e) => {
+    e.currentTarget.src = fallbackImage(600, 400);
+  };
+
   return (
     <section className="py-16 px-4 md:px-8 lg:px-16 bg-gradient-to-r from-indigo-50 to-purple-50">
       <div className="max-w-7xl mx-auto">
@@ -87,7 +92,7 @@ const GetConnectedSection = () => {
                   className="mt-1 h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500" 
                 />
                 <label htmlFor="privacy" className="ml-2 block text-sm text-gray-600">
-                  I agree to the <a href="#" className="text-primary-600 hover:underline">Privacy Policy</a> and consent to be contacted.
+                  I agree to the <a href="/privacy-policy" className="text-primary-600 hover:underline">Privacy Policy</a> and consent to be contacted.
                 </label>
               </div>
               
@@ -105,10 +110,7 @@ const GetConnectedSection = () => {
               src="/images/contact-us.jpg" 
               alt="Contact our team" 
               className="rounded-xl shadow-lg w-full h-auto"
-              onError={({ currentTarget }) => {
-                currentTarget.onerror = null;
-                currentTarget.src = "https://via.placeholder.com/600x400?text=Contact+Us";
-              }}
+              onError={handleImageError}
             />
             
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -1,6 +1,11 @@
 import React from 'react';
+import { fallbackImage } from '../../assets/images/placeholder';
 
 const HeroSection = () => {
+  const handleImageError = (e) => {
+    e.currentTarget.src = fallbackImage(600, 400);
+  };
+
   return (
     <section className="relative py-20 px-4 md:px-8 lg:px-16 overflow-hidden">
       <div className="max-w-7xl mx-auto">
@@ -28,10 +33,7 @@ const HeroSection = () => {
                 src="/images/hero-illustration.svg" 
                 alt="Mental Health Illustration" 
                 className="w-full h-auto"
-                onError={({ currentTarget }) => {
-                  currentTarget.onerror = null; // prevents looping
-                  currentTarget.src = "https://via.placeholder.com/600x400?text=Mental+Health+Illustration";
-                }}
+                onError={handleImageError}
               />
             </div>
             <div className="absolute -bottom-4 -right-4 w-64 h-64 bg-primary-100 rounded-full -z-10"></div>

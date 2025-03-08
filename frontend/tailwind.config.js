@@ -1,64 +1,68 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    "./src/**/*.{js,jsx,ts,tsx}",
-    "./public/index.html"
-  ],
+  darkMode: 'class',
+  content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
-          900: '#4c1d95',
+        background: {
+          DEFAULT: "#F5ECE3", // Soft beige background
+          dark: "#1E1915", // Dark mode background
         },
-        indigo: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+        sidebar: {
+          DEFAULT: "#4D2D21", // Deep brown sidebar
+          dark: "#2A1A14", // Dark mode sidebar
         },
-        purple: {
-          50: '#faf5ff',
-          100: '#f3e8ff',
-          200: '#e9d5ff',
-          300: '#d8b4fe',
-          400: '#c084fc',
-          500: '#a855f7',
-          600: '#9333ea',
-          700: '#7e22ce',
-          800: '#6b21a8',
-          900: '#581c87',
-          950: '#3b0764',
+        card: {
+          DEFAULT: "#E7D7CE", // Light brown card background
+          dark: "#302520", // Dark mode card
+        },
+        text: {
+          primary: "#3A2A1C", // Dark brown text
+          secondary: "#6D5B4B", // Warm gray text
+          dark: {
+            primary: "#E7D7CE", // Light text for dark mode
+            secondary: "#A99584", // Gray text for dark mode
+          }
+        },
+        chart: {
+          green: "#79A66D", // Soft green
+          orange: "#E37A3E", // Warm orange
+          purple: "#A389E6", // Pastel purple
+          yellow: "#F8C55A", // Pastel yellow
+        },
+        button: {
+          primary: "#F8C55A", // Pastel yellow
+          hover: "rgba(255,255,255,0.1)", // Soft glow
+        },
+        indicator: {
+          red: "#E74C3C", // Red dot indicator
         }
       },
-      animation: {
-        'float': 'float 6s ease-in-out infinite',
-      },
-      keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-10px)' },
-        }
+      boxShadow: {
+        'card': '0 4px 12px rgba(0, 0, 0, 0.05)',
+        'card-hover': '0 8px 24px rgba(0, 0, 0, 0.1)',
+        'sidebar': '4px 0 15px rgba(0, 0, 0, 0.03)',
+        'nav': '0 2px 10px rgba(0, 0, 0, 0.04)',
       },
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'sans-serif'],
-      }
+        sans: ['Inter', 'sans-serif'],
+      },
+      gridTemplateColumns: {
+        'dashboard': '15% 85%',
+        'card-row': 'repeat(auto-fit, minmax(250px, 1fr))',
+      },
+      animation: {
+        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+      },
+      transitionProperty: {
+        'width': 'width',
+        'height': 'height',
+        'spacing': 'margin, padding',
+      },
     },
   },
-  plugins: [],
-}
+  plugins: [
+    require("tailwindcss-animate")
+  ],
+};
