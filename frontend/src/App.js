@@ -9,6 +9,8 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import { LoadingProvider } from './context/LoadingContext';
 import LoadingScreen from './components/LoadingScreen';
+import AssessmentPage from './pages/AssessmentPage';
+import ErrorPage from './components/ErrorPage';
 
 // Higher-order component to apply LoadingProvider
 const withLoadingProvider = (Component) => {
@@ -49,6 +51,7 @@ const router = createBrowserRouter([
         <Home />
       </LayoutWithLoading>
     ),
+    errorElement: <ErrorPage />
   },
   // Redirect from /login to /auth/sign-in
   {
@@ -80,7 +83,21 @@ const router = createBrowserRouter([
     path: "/dashboard/:section",
     element: <Dashboard />,
   },
-  // Add more routes here as needed
+  // Assessment route
+  {
+    path: "/assessment",
+    element: withLoadingProvider(AssessmentPage)(),
+  },
+  // Handle the misspelled assessment route
+  {
+    path: "/assesment",
+    element: <Navigate to="/assessment" replace />,
+  },
+  // Catch-all route for 404 pages
+  {
+    path: "*",
+    element: <ErrorPage />,
+  }
 ], {
   future: {
     v7_startTransition: true,
