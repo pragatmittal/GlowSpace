@@ -10,7 +10,8 @@ import Dashboard from './pages/Dashboard';
 import { LoadingProvider } from './context/LoadingContext';
 import LoadingScreen from './components/LoadingScreen';
 import AssessmentPage from './pages/AssessmentPage';
-import ErrorPage from './components/ErrorPage';
+import GenderAssessment from './pages/GenderAssessment';
+import AgeAssessment from './pages/AgeAssessment';
 
 // Higher-order component to apply LoadingProvider
 const withLoadingProvider = (Component) => {
@@ -23,7 +24,7 @@ const withLoadingProvider = (Component) => {
       </LoadingProvider>
     );
   };
-  
+
   return WithLoadingProvider;
 };
 
@@ -50,8 +51,7 @@ const router = createBrowserRouter([
       <LayoutWithLoading>
         <Home />
       </LayoutWithLoading>
-    ),
-    errorElement: <ErrorPage />
+    )
   },
   // Redirect from /login to /auth/sign-in
   {
@@ -93,10 +93,15 @@ const router = createBrowserRouter([
     path: "/assesment",
     element: <Navigate to="/assessment" replace />,
   },
-  // Catch-all route for 404 pages
+  // Gender Assessment route
   {
-    path: "*",
-    element: <ErrorPage />,
+    path: "/gender-assessment",
+    element: withLoadingProvider(GenderAssessment)(),
+  },
+  // Age Assessment route
+  {
+    path: "/age-assessment",
+    element: withLoadingProvider(AgeAssessment)(),
   }
 ], {
   future: {

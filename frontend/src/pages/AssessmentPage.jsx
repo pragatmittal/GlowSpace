@@ -124,7 +124,7 @@ const AssessmentPage = () => {
             className="w-full max-w-xs bg-[#563C26] text-white py-4 rounded-full font-medium text-base shadow-md"
             whileHover={{ scale: 1.02, boxShadow: "0 4px 12px rgba(86, 60, 38, 0.2)" }}
             whileTap={{ scale: 0.98 }}
-            onClick={() => navigate('/assessment2')}
+            onClick={() => navigate('/gender-assessment')}
           >
             Continue →
           </motion.button>
