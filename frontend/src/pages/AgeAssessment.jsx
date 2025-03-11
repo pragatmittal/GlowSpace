@@ -94,8 +94,7 @@ function AgeAssessment() {
       duration: 0.5,
       ease: 'power2.inOut',
       onComplete: () => {
-        // Navigate to next assessment page
-        // TODO: Add your navigation logic here
+        navigate('/weight-assessment');
       }
     });
   };

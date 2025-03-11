@@ -5,6 +5,8 @@ import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import GenderAssessment from "./pages/GenderAssessment";
 import AgeAssessment from "./pages/AgeAssessment";
+import WeightAssessment from "./pages/WeightAssessment";
+import ProfessionalHelpAssessment from "./pages/ProfessionalHelpAssessment";
 
 // Create router with routes
 export const router = createBrowserRouter([
@@ -31,5 +33,13 @@ export const router = createBrowserRouter([
   {
     path: "/age-assessment",
     element: <AgeAssessment />
+  },
+  {
+    path: "/weight-assessment",
+    element: <WeightAssessment />
+  },
+  {
+    path: "/professional-help-assessment",
+    element: <ProfessionalHelpAssessment />
   }
 ]);

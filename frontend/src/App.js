@@ -12,6 +12,14 @@ import LoadingScreen from './components/LoadingScreen';
 import AssessmentPage from './pages/AssessmentPage';
 import GenderAssessment from './pages/GenderAssessment';
 import AgeAssessment from './pages/AgeAssessment';
+import WeightAssessment from './pages/WeightAssessment';
+import ProfessionalHelpAssessment from './pages/ProfessionalHelpAssessment';
+import PhysicalDistressAssessment from './pages/PhysicalDistressAssessment';
+import SleepQualityAssessment from './pages/SleepQualityAssessment';
+import MedicationAssessment from './pages/MedicationAssessment';
+import MedicationSelection from './pages/MedicationSelection';
+import MentalHealthSymptoms from './pages/MentalHealthSymptoms';
+import AISoundAnalysis from './pages/AISoundAnalysis';
 
 // Higher-order component to apply LoadingProvider
 const withLoadingProvider = (Component) => {
@@ -102,6 +110,38 @@ const router = createBrowserRouter([
   {
     path: "/age-assessment",
     element: withLoadingProvider(AgeAssessment)(),
+  },
+  {
+    path: "/weight-assessment",
+    element: withLoadingProvider(WeightAssessment)(),
+  },
+  {
+    path: "/professional-help-assessment",
+    element: withLoadingProvider(ProfessionalHelpAssessment)(),
+  },
+  {
+    path: "/physical-distress-assessment",
+    element: withLoadingProvider(PhysicalDistressAssessment)(),
+  },
+  {
+    path: "/sleep-quality-assessment",
+    element: withLoadingProvider(SleepQualityAssessment)(),
+  },
+  {
+    path: "/medication-assessment",
+    element: withLoadingProvider(MedicationAssessment)(),
+  },
+  {
+    path: "/medication-selection",
+    element: withLoadingProvider(MedicationSelection)(),
+  },
+  {
+    path: "/mental-health-symptoms",
+    element: withLoadingProvider(MentalHealthSymptoms)(),
+  },
+  {
+    path: "/ai-sound-analysis",
+    element: withLoadingProvider(AISoundAnalysis)(),
   }
 ], {
   future: {
