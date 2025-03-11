@@ -57,7 +57,7 @@ function AISoundAnalysis() {
       duration: 0.5,
       ease: 'power2.inOut',
       onComplete: () => {
-        navigate('/next-route'); // Replace with actual next route
+        navigate('/expression-analysis');
       }
     });
   };

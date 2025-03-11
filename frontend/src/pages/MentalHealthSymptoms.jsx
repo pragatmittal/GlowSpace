@@ -84,7 +84,7 @@ function MentalHealthSymptoms() {
       duration: 0.5,
       ease: 'power2.inOut',
       onComplete: () => {
-        navigate('/ai-sound-analysis');
+        navigate('/stress-level-assessment');
       }
     });
   };

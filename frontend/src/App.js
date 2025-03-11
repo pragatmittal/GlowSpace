@@ -20,6 +20,8 @@ import MedicationAssessment from './pages/MedicationAssessment';
 import MedicationSelection from './pages/MedicationSelection';
 import MentalHealthSymptoms from './pages/MentalHealthSymptoms';
 import AISoundAnalysis from './pages/AISoundAnalysis';
+import StressLevelAssessment from './pages/StressLevelAssessment';
+import ExpressionAnalysis from './pages/ExpressionAnalysis';
 
 // Higher-order component to apply LoadingProvider
 const withLoadingProvider = (Component) => {
@@ -142,6 +144,14 @@ const router = createBrowserRouter([
   {
     path: "/ai-sound-analysis",
     element: withLoadingProvider(AISoundAnalysis)(),
+  },
+  {
+    path: "/stress-level-assessment",
+    element: withLoadingProvider(StressLevelAssessment)(),
+  },
+  {
+    path: "/expression-analysis",
+    element: withLoadingProvider(ExpressionAnalysis)(),
   }
 ], {
   future: {
