@@ -42,8 +42,7 @@ function ExpressionAnalysis() {
         duration: 0.5,
         ease: 'power2.inOut',
         onComplete: () => {
-          // Replace with actual next route
-          alert('Assessment Complete!');
+          navigate('/mood-tracker');
         }
       });
     } else {

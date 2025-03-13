@@ -22,6 +22,7 @@ import MentalHealthSymptoms from './pages/MentalHealthSymptoms';
 import AISoundAnalysis from './pages/AISoundAnalysis';
 import StressLevelAssessment from './pages/StressLevelAssessment';
 import ExpressionAnalysis from './pages/ExpressionAnalysis';
+import MoodTracker from './pages/MoodTracker';
 
 // Higher-order component to apply LoadingProvider
 const withLoadingProvider = (Component) => {
@@ -152,6 +153,10 @@ const router = createBrowserRouter([
   {
     path: "/expression-analysis",
     element: withLoadingProvider(ExpressionAnalysis)(),
+  },
+  {
+    path: "/mood-tracker",
+    element: withLoadingProvider(MoodTracker)(),
   }
 ], {
   future: {
