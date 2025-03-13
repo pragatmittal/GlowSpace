@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider, Navigate, useLocation } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Navbar from './components/Navbar';
 import { findNestedRouters } from './utils/findRouterComponents';
@@ -23,6 +23,10 @@ import AISoundAnalysis from './pages/AISoundAnalysis';
 import StressLevelAssessment from './pages/StressLevelAssessment';
 import ExpressionAnalysis from './pages/ExpressionAnalysis';
 import MoodTracker from './pages/MoodTracker';
+import MoodOverview from './pages/mood/MoodOverview';
+import MoodStatistics from './pages/mood/MoodStatistics';
+import MoodSelection from './pages/mood/MoodSelection';
+import MoodHistory from './pages/mood/MoodHistory';
 
 // Higher-order component to apply LoadingProvider
 const withLoadingProvider = (Component) => {
@@ -157,6 +161,23 @@ const router = createBrowserRouter([
   {
     path: "/mood-tracker",
     element: withLoadingProvider(MoodTracker)(),
+  },
+  // Mood Tracker Routes
+  {
+    path: "/mood",
+    element: withLoadingProvider(MoodOverview)(),
+  },
+  {
+    path: "/mood/stats",
+    element: withLoadingProvider(MoodStatistics)(),
+  },
+  {
+    path: "/mood/:mood",
+    element: withLoadingProvider(MoodSelection)(),
+  },
+  {
+    path: "/mood/history",
+    element: withLoadingProvider(MoodHistory)(),
   }
 ], {
   future: {
