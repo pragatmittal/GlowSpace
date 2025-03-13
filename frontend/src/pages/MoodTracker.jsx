@@ -1,101 +1,90 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import gsap from 'gsap';
 import Lottie from 'lottie-react';
-
-// Import mood animations
-import happyAnim from '../assets/animations/happy.json';
-import sadAnim from '../assets/animations/sad.json';
-import neutralAnim from '../assets/animations/neutral.json';
-import excitedAnim from '../assets/animations/excited.json';
-import depressedAnim from '../assets/animations/depressed.json';
+import useLottieAnimation from '../hooks/useLottieAnimation';
 
 const moods = [
   {
     id: 'overjoyed',
     name: 'Overjoyed',
-    animation: excitedAnim,
+    animation: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/lottie.json',
     description: 'Feeling amazing and full of energy!'
   },
   {
     id: 'happy',
     name: 'Happy',
-    animation: happyAnim,
+    animation: 'https://fonts.gstatic.com/s/e/notoemoji/latest/263a_fe0f/lottie.json',
     description: 'Content and satisfied with life'
   },
   {
     id: 'neutral',
     name: 'Neutral',
-    animation: neutralAnim,
+    animation: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f642/lottie.json',
     description: 'Neither particularly good nor bad'
   },
   {
     id: 'sad',
     name: 'Sad',
-    animation: sadAnim,
+    animation: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f61e/lottie.json',
     description: 'Feeling down or unhappy'
   },
   {
     id: 'depressed',
     name: 'Depressed',
-    animation: depressedAnim,
+    animation: 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f629/lottie.json',
     description: 'Experiencing persistent sadness'
   }
 ];
+
+const MoodAnimation = ({ url, size = 32 }) => {
+  const { animationData, loading, error } = useLottieAnimation(url);
+
+  if (loading) {
+    return (
+      <div 
+        style={{ width: size, height: size }}
+        className="animate-pulse bg-gray-200 rounded-full"
+      />
+    );
+  }
+
+  if (error) {
+    return (
+      <div 
+        style={{ width: size, height: size }}
+        className="flex items-center justify-center bg-gray-100 rounded-full"
+      >
+        😐
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ width: size, height: size }}>
+      <Lottie
+        animationData={animationData}
+        loop={true}
+        autoplay={true}
+      />
+    </div>
+  );
+};
 
 function MoodTracker() {
   const navigate = useNavigate();
   const [selectedMood, setSelectedMood] = useState(null);
 
-  useEffect(() => {
-    // Initial fade in animation
-    gsap.from('.mood-card', {
-      y: 30,
-      opacity: 0,
-      duration: 0.5,
-      stagger: 0.1,
-      ease: 'back.out(1.2)'
-    });
-  }, []);
-
   const handleMoodSelect = (mood) => {
     setSelectedMood(mood);
-
-    // Reset all cards
-    gsap.to('.mood-card', {
-      scale: 1,
-      backgroundColor: '#FFFFFF',
-      duration: 0.3
-    });
-
-    // Animate selected card
-    gsap.to(`#mood-${mood.id}`, {
-      scale: 1.02,
-      backgroundColor: '#F7F2EC',
-      duration: 0.3,
-      onComplete: () => {
-        // Navigate to the selected mood's route
-        navigate(`/mood/${mood.id}`);
-      }
-    });
+    navigate(`/mood/${mood.id}`);
   };
 
   const handleBack = () => {
-    gsap.to('#mood-tracker', {
-      opacity: 0,
-      duration: 0.5,
-      ease: 'power2.inOut',
-      onComplete: () => {
-        navigate('/expression-analysis');
-      }
-    });
+    navigate('/expression-analysis');
   };
 
   return (
-    <div 
-      id="mood-tracker"
-      className="min-h-screen bg-[#F9F6F2]"
-    >
+    <div className="min-h-screen bg-[#F9F6F2]">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -105,9 +94,7 @@ function MoodTracker() {
           >
             ←
           </button>
-          <div className="text-sm font-medium text-[#4F3222]">
-            14 of 14
-          </div>
+          
         </div>
 
         {/* Title */}
@@ -121,24 +108,18 @@ function MoodTracker() {
         </div>
 
         {/* Mood Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {moods.map((mood) => (
             <div
               key={mood.id}
-              id={`mood-${mood.id}`}
               onClick={() => handleMoodSelect(mood)}
-              className={`mood-card bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition-all cursor-pointer
-                ${selectedMood?.id === mood.id ? 'ring-2 ring-[#4F3222] bg-[#F7F2EC]' : ''}
+              className={`bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition-all cursor-pointer
+                ${selectedMood?.id === mood.id ? 'ring-2 ring-[#4F3222]' : ''}
               `}
-              style={{ opacity: 1 }}
             >
               <div className="flex flex-col items-center space-y-4">
                 <div className="w-32 h-32">
-                  <Lottie
-                    animationData={mood.animation}
-                    loop={true}
-                    autoplay={true}
-                  />
+                  <MoodAnimation url={mood.animation} size={128} />
                 </div>
                 <h3 className="text-xl font-medium text-[#4F3222]">
                   {mood.name}
