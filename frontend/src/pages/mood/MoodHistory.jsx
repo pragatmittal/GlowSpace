@@ -187,13 +187,14 @@ function MoodHistory() {
   };
 
   const handleDeleteConfirmed = () => {
+    const moodId = `mood-item-${editingMood.date.getTime()}`;
     setMoodHistory(prev => 
       prev.filter(mood => mood.date.toDateString() !== editingMood.date.toDateString())
     );
     setShowDeleteConfirm(false);
     
     // Show delete animation
-    gsap.to(`#mood-${editingMood.date.toDateString()}`, {
+    gsap.to(`#${moodId}`, {
       opacity: 0,
       x: 100,
       duration: 0.3,
@@ -348,7 +349,7 @@ function MoodHistory() {
               {sortedAndFilteredHistory.map((item, index) => (
                 <div
                   key={index}
-                  id={`mood-${item.date.toDateString()}`}
+                  id={`mood-item-${item.date.getTime()}`}
                   className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[#E5E7EB] shadow-sm hover:shadow-md transition-all duration-300 history-item"
                   style={{ backgroundColor: 'white', opacity: 1 }}
                 >
@@ -583,7 +584,7 @@ function MoodHistory() {
         {/* Floating Add Button */}
         <button
           id="add-mood-btn"
-          onClick={() => navigate('/mood/depressed')}
+          onClick={() => navigate('/mood-tracker')}
           className="fixed bottom-8 right-8 w-16 h-16 bg-[#4F3222] text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-[#3D2516] transition-all hover:scale-110"
         >
           +

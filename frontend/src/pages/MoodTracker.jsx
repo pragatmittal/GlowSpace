@@ -48,15 +48,7 @@ function MoodTracker() {
   const [selectedMood, setSelectedMood] = useState(null);
 
   useEffect(() => {
-    // Initial fade in animation with proper opacity
-    gsap.set('#mood-tracker', { opacity: 0 }); // Set initial opacity
-    gsap.to('#mood-tracker', {
-      opacity: 1,
-      duration: 0.5,
-      ease: 'power2.inOut'
-    });
-
-    // Animate mood cards in sequence
+    // Initial fade in animation
     gsap.from('.mood-card', {
       y: 30,
       opacity: 0,
@@ -72,7 +64,7 @@ function MoodTracker() {
     // Reset all cards
     gsap.to('.mood-card', {
       scale: 1,
-      backgroundColor: 'white',
+      backgroundColor: '#FFFFFF',
       duration: 0.3
     });
 
@@ -80,7 +72,11 @@ function MoodTracker() {
     gsap.to(`#mood-${mood.id}`, {
       scale: 1.02,
       backgroundColor: '#F7F2EC',
-      duration: 0.3
+      duration: 0.3,
+      onComplete: () => {
+        // Navigate to the selected mood's route
+        navigate(`/mood/${mood.id}`);
+      }
     });
   };
 
@@ -95,25 +91,10 @@ function MoodTracker() {
     });
   };
 
-  const handleContinue = () => {
-    if (selectedMood) {
-      gsap.to('#mood-tracker', {
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.inOut',
-        onComplete: () => {
-          // Navigate to the mood selection page instead of dashboard
-          navigate('/mood/select');
-        }
-      });
-    }
-  };
-
   return (
     <div 
       id="mood-tracker"
-      className="min-h-screen bg-[#F9F6F2] text-[#4F3222]"
-      style={{ opacity: 0 }}
+      className="min-h-screen bg-[#F9F6F2]"
     >
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
@@ -144,10 +125,12 @@ function MoodTracker() {
           {moods.map((mood) => (
             <div
               key={mood.id}
+              id={`mood-${mood.id}`}
               onClick={() => handleMoodSelect(mood)}
-              className={`bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition-all cursor-pointer
+              className={`mood-card bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition-all cursor-pointer
                 ${selectedMood?.id === mood.id ? 'ring-2 ring-[#4F3222] bg-[#F7F2EC]' : ''}
               `}
+              style={{ opacity: 1 }}
             >
               <div className="flex flex-col items-center space-y-4">
                 <div className="w-32 h-32">
@@ -166,19 +149,6 @@ function MoodTracker() {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Continue Button */}
-        <div className="flex justify-center">
-          <button
-            onClick={handleContinue}
-            disabled={!selectedMood}
-            className={`px-8 py-3 rounded-full text-white bg-[#4F3222] hover:opacity-90 transition-all
-              ${!selectedMood && 'opacity-50 cursor-not-allowed'}
-            `}
-          >
-            Continue →
-          </button>
         </div>
       </div>
     </div>
