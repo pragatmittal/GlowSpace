@@ -1,36 +1,48 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
+const session = require('express-session');
+const passport = require('./middleware/auth.middleware');
+const connectDB = require('./config/db');
 const dotenv = require('dotenv');
 
 // Import routes
-const authRoutes = require('./routes/auth.routes');
-const userRoutes = require('./routes/user.routes');
-const postRoutes = require('./routes/post.routes');
+const authRoutes = require('./routes/authRoutes');
 
 // Config
 dotenv.config();
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Connect to MongoDB
+connectDB();
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('MongoDB connection error:', err));
+// Middleware
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
+app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Initialize Passport and restore authentication state from session
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/posts', postRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  const status = err.status || 500;
-  const message = err.message || 'Internal Server Error';
-  res.status(status).json({ message });
+  console.error(err.stack);
+  res.status(500).json({ message: 'Something went wrong!' });
 });
 
 const PORT = process.env.PORT || 5000;
