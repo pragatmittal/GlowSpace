@@ -1,10 +1,16 @@
 import { useState } from "react";
 import { Mail, Lock, Eye, EyeOff, AlertTriangle, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useLoading } from "../../context/LoadingContext";
+import { useAuth } from "../../context/AuthContext";
+import axios from "axios";
 
 export default function SignUp() {
+  const { navigateWithLoading, startFetching, showSuccess, showError } = useLoading();
+  const { checkAuthStatus } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
     confirmPassword: ""
@@ -13,6 +19,7 @@ export default function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Inline SVG component for the mascot
   const SignUpMascot = () => (
@@ -86,6 +93,13 @@ export default function SignUp() {
     let newErrors = { ...errors };
 
     switch (name) {
+      case "name":
+        if (!value) {
+          newErrors.name = "Name cannot be empty!";
+        } else {
+          delete newErrors.name;
+        }
+        break;
       case "email":
         if (!value) {
           newErrors.email = "Email cannot be empty!";
@@ -124,11 +138,12 @@ export default function SignUp() {
     setErrors(newErrors);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Mark all fields as touched
     setTouched({
+      name: true,
       email: true,
       password: true,
       confirmPassword: true
@@ -136,6 +151,10 @@ export default function SignUp() {
     
     // Validate all fields
     let newErrors = {};
+    if (!formData.name) {
+      newErrors.name = "Name cannot be empty!";
+    }
+    
     if (!formData.email) {
       newErrors.email = "Email cannot be empty!";
     } else if (!validateEmail(formData.email)) {
@@ -156,13 +175,42 @@ export default function SignUp() {
     
     // If no errors, proceed with sign up
     if (Object.keys(newErrors).length === 0) {
-      // Redirect to home page after successful signup
-      navigate("/");
+      setIsSubmitting(true);
+      startFetching("Creating your account...");
+      
+      try {
+        // Make API call to register user
+        const userData = {
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        };
+        
+        const response = await axios.post('http://localhost:5000/api/auth/register', userData);
+        
+        if (response.data) {
+          showSuccess("Account created successfully!");
+          
+          // Automatically log in after successful registration
+          await checkAuthStatus();
+          
+          // Navigate to home page after successful signup
+          setTimeout(() => {
+            navigateWithLoading("/");
+          }, 1500);
+        }
+      } catch (error) {
+        console.error("Registration error:", error);
+        showError(error.response?.data?.message || "Registration failed. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
   const isFormValid = () => {
     return (
+      formData.name &&
       formData.email &&
       formData.password &&
       formData.confirmPassword &&
@@ -197,6 +245,30 @@ export default function SignUp() {
           <h1 className="text-4xl font-bold text-brown text-center mb-10">Create Account</h1>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label htmlFor="name" className="block text-brown font-medium text-lg">
+                Name
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-brown" />
+                </div>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  className={`w-full pl-12 pr-4 py-4 border ${
+                    touched.name && errors.name ? "border-orange-400" : "border-[#E8E4D8]"
+                  } rounded-full bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent`}
+                  placeholder="Enter your name..."
+                />
+              </div>
+              {touched.name && errors.name && <ErrorMessage message={errors.name} />}
+            </div>
+
             <div className="space-y-2">
               <label htmlFor="email" className="block text-brown font-medium text-lg">
                 Email Address

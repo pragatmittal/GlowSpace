@@ -1,18 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import signinImage from "../../assets/images/signin.svg"
 import { useLoading } from "../../context/LoadingContext";
+import { useAuth } from "../../context/AuthContext";
 import SocialLogin from "../../components/SocialLogin";
 
 export default function SignIn() {
-  const { navigateWithLoading, startFetching, showSuccess } = useLoading();
+  const { navigateWithLoading, startFetching, showSuccess, showError } = useLoading();
+  const { login, checkAuthStatus, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [formData, setFormData] = useState({
     email: "",
     password: ""
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get redirect path from location state or default to "/"
+  const from = location.state?.from?.pathname || "/";
+
+  // If already authenticated, redirect to home or intended page
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigateWithLoading(from);
+    }
+  }, [isAuthenticated, navigateWithLoading, from]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -28,27 +43,39 @@ export default function SignIn() {
     e.preventDefault();
     
     if (!formData.email || !formData.password) {
-      return; // Simple validation - don't submit if fields are empty
+      showError("Please provide both email and password");
+      return;
     }
     
     setIsSubmitting(true);
     
-    // Show the loading screen while "fetching" data
+    // Show the loading screen while authenticating
     startFetching("Authenticating...");
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Use the login method from AuthContext instead of direct axios call
+      const result = await login(formData.email, formData.password);
       
-      // Show success message
-      showSuccess("Login successful!");
-      
-      // Navigate to home page
-      setTimeout(() => {
-        navigateWithLoading("/");
-      }, 1000);
+      // Check if login was successful
+      if (result && result.success) {
+        // Refresh auth context to ensure state is updated
+        await checkAuthStatus();
+        
+        // Show success message
+        showSuccess("Login successful!");
+        
+        // Navigate to home page or intended destination after a short delay
+        setTimeout(() => {
+          navigateWithLoading(from); // Redirect with loading animation
+        }, 1000);
+      } else {
+        throw new Error(result?.error || "Login failed");
+      }
     } catch (error) {
       console.error("Login error:", error);
+      
+      // Show specific error message
+      showError(error.message || "Login failed. Please check your credentials.");
     } finally {
       setIsSubmitting(false);
     }

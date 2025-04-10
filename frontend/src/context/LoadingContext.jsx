@@ -7,6 +7,7 @@ export const LOADING_STATES = {
   PAGE_TRANSITION: 'page_transition',
   FETCHING_DATA: 'fetching_data',
   SUCCESS: 'success',
+  ERROR: 'error'
 };
 
 // Create the context
@@ -103,10 +104,23 @@ export const LoadingProvider = ({ children }) => {
   };
 
   // Function to show success message
-  const showSuccess = (msg = 'Operation completed successfully!') => {
-    showLoading(LOADING_STATES.SUCCESS, msg);
-    // Auto-hide after 2 seconds
+  const showSuccess = (msg = 'Success!') => {
+    setLoadingState(LOADING_STATES.SUCCESS);
+    setMessage(msg);
+    setIsVisible(true);
+    
+    // Automatically hide after a delay
     setTimeout(hideLoading, 2000);
+  };
+
+  // Function to show loading error state
+  const showError = (msg = 'An error occurred') => {
+    setLoadingState(LOADING_STATES.ERROR);
+    setMessage(msg);
+    setIsVisible(true);
+    
+    // Automatically hide after a delay
+    setTimeout(hideLoading, 3000);
   };
 
   // Function to detect network speed (simplified version)
@@ -173,6 +187,7 @@ export const LoadingProvider = ({ children }) => {
     navigateWithLoading,
     startFetching,
     showSuccess,
+    showError,
     showLoading,
     hideLoading,
   };

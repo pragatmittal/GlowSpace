@@ -33,6 +33,40 @@ const LoadingScreen = () => {
     }
   };
 
+  // Determine the background color based on the loading state
+  let bgColor = "bg-white";
+  let iconColor = "text-blue-600";
+  
+  if (loadingState === LOADING_STATES.SUCCESS) {
+    bgColor = "bg-green-50";
+    iconColor = "text-green-600";
+  } else if (loadingState === LOADING_STATES.ERROR) {
+    bgColor = "bg-red-50";
+    iconColor = "text-red-600";
+  }
+
+  // Choose the appropriate icon based on loading state
+  let LoadingIcon = () => null;
+  
+  if (loadingState === LOADING_STATES.SUCCESS) {
+    LoadingIcon = () => (
+      <svg className={`w-16 h-16 ${iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+    );
+  } else if (loadingState === LOADING_STATES.ERROR) {
+    LoadingIcon = () => (
+      <svg className={`w-16 h-16 ${iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    );
+  } else {
+    // Default spinner for other states
+    LoadingIcon = () => (
+      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+    );
+  }
+
   // Render different loading screens based on the current state
   const renderLoadingContent = () => {
     switch (loadingState) {
@@ -122,18 +156,7 @@ const LoadingScreen = () => {
               transition={{ duration: 0.5 }}
               className="mb-8"
             >
-              <svg className="w-20 h-20 mx-auto" viewBox="0 0 24 24" fill="none">
-                <motion.path
-                  d="M5 12L10 17L20 7"
-                  stroke="white"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  initial={{ pathLength: 0 }}
-                  animate={{ pathLength: 1 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                />
-              </svg>
+              <LoadingIcon />
             </motion.div>
             
             <motion.p 
@@ -181,20 +204,6 @@ const LoadingScreen = () => {
     }
   };
 
-  // Get background color based on current state
-  const getBackgroundColor = () => {
-    switch (loadingState) {
-      case LOADING_STATES.PAGE_TRANSITION:
-        return 'bg-[#F8F6F2]';
-      case LOADING_STATES.FETCHING_DATA:
-        return 'bg-gradient-to-br from-[#A6D49F] to-[#4C704C]';
-      case LOADING_STATES.SUCCESS:
-        return 'bg-[#E67E22]';
-      default:
-        return 'bg-[#F8F6F2]';
-    }
-  };
-
   return (
     <AnimatePresence>
       {isVisible && (
@@ -203,7 +212,7 @@ const LoadingScreen = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className={`fixed inset-0 z-50 flex items-center justify-center ${getBackgroundColor()}`}
+          className={`fixed inset-0 z-50 flex items-center justify-center ${bgColor}`}
         >
           {renderLoadingContent()}
         </motion.div>

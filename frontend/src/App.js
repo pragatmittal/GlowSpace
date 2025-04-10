@@ -8,6 +8,7 @@ import SignUp from './pages/auth/SignUp';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import { LoadingProvider } from './context/LoadingContext';
+import { AuthProvider } from './context/AuthContext';
 import LoadingScreen from './components/LoadingScreen';
 import AssessmentPage from './pages/AssessmentPage';
 import GenderAssessment from './pages/GenderAssessment';
@@ -27,20 +28,23 @@ import MoodOverview from './pages/mood/MoodOverview';
 import MoodStatistics from './pages/mood/MoodStatistics';
 import MoodSelection from './pages/mood/MoodSelection';
 import MoodHistory from './pages/mood/MoodHistory';
+import ProtectedRoute from './components/ProtectedRoute';
 
-// Higher-order component to apply LoadingProvider
-const withLoadingProvider = (Component) => {
-  const WithLoadingProvider = (props) => {
+// Higher-order component to apply LoadingProvider and AuthProvider
+const withProviders = (Component) => {
+  const WithProviders = (props) => {
     // Wrap with LoadingProvider and include LoadingScreen
     return (
-      <LoadingProvider>
-        <LoadingScreen />
-        <Component {...props} />
-      </LoadingProvider>
+      <AuthProvider>
+        <LoadingProvider>
+          <LoadingScreen />
+          <Component {...props} />
+        </LoadingProvider>
+      </AuthProvider>
     );
   };
 
-  return WithLoadingProvider;
+  return WithProviders;
 };
 
 // Define a layout component that includes the Navbar
@@ -55,17 +59,28 @@ const Layout = ({ children }) => {
   );
 };
 
-// Wrap the Layout component with the LoadingProvider
-const LayoutWithLoading = withLoadingProvider(Layout);
+// Wrap the Layout component with the providers
+const LayoutWithProviders = withProviders(Layout);
 
 // Create router with proper route definitions and future flags
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
-      <LayoutWithLoading>
+      <LayoutWithProviders>
         <Home />
-      </LayoutWithLoading>
+      </LayoutWithProviders>
+    )
+  },
+  // Protected route for /home
+  {
+    path: "/home",
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <Home />
+        </ProtectedRoute>
+      </LayoutWithProviders>
     )
   },
   // Redirect from /login to /auth/sign-in
@@ -76,108 +91,261 @@ const router = createBrowserRouter([
   // Sign-in route
   {
     path: "/auth/sign-in",
-    element: withLoadingProvider(SignIn)(),
+    element: withProviders(SignIn)(),
   },
   // Sign-up route
   {
     path: "/auth/signup",
-    element: withLoadingProvider(SignUp)(),
+    element: withProviders(SignUp)(),
   },
   // Forgot Password route
   {
     path: "/auth/forgotpassword",
-    element: withLoadingProvider(ForgotPassword)(),
+    element: withProviders(ForgotPassword)(),
   },
-  // Dashboard route
+  // Dashboard route - protected
   {
     path: "/dashboard",
-    element: <Dashboard />,
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
-  // Dashboard sub-routes
+  // Dashboard sub-routes - protected
   {
     path: "/dashboard/:section",
-    element: <Dashboard />,
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
-  // Assessment route
+  // Assessment route - protected
   {
     path: "/assessment",
-    element: withLoadingProvider(AssessmentPage)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <AssessmentPage />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
+  },
+  // Added assessment2 route as protected
+  {
+    path: "/assessment2",
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <AssessmentPage />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
+  },
+  // Added test route as protected
+  {
+    path: "/test",
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <Home />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
   // Handle the misspelled assessment route
   {
     path: "/assesment",
     element: <Navigate to="/assessment" replace />,
   },
-  // Gender Assessment route
+  // Gender Assessment route - protected
   {
     path: "/gender-assessment",
-    element: withLoadingProvider(GenderAssessment)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <GenderAssessment />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
-  // Age Assessment route
+  // Age Assessment route - protected
   {
     path: "/age-assessment",
-    element: withLoadingProvider(AgeAssessment)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <AgeAssessment />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // Weight Assessment route - protected
   {
     path: "/weight-assessment",
-    element: withLoadingProvider(WeightAssessment)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <WeightAssessment />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // Professional Help Assessment route - protected
   {
     path: "/professional-help-assessment",
-    element: withLoadingProvider(ProfessionalHelpAssessment)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <ProfessionalHelpAssessment />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // Physical Distress Assessment route - protected
   {
     path: "/physical-distress-assessment",
-    element: withLoadingProvider(PhysicalDistressAssessment)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <PhysicalDistressAssessment />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // Sleep Quality Assessment route - protected
   {
     path: "/sleep-quality-assessment",
-    element: withLoadingProvider(SleepQualityAssessment)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <SleepQualityAssessment />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // Medication Assessment route - protected
   {
     path: "/medication-assessment",
-    element: withLoadingProvider(MedicationAssessment)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <MedicationAssessment />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // Medication Selection route - protected
   {
     path: "/medication-selection",
-    element: withLoadingProvider(MedicationSelection)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <MedicationSelection />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // Mental Health Symptoms route - protected
   {
     path: "/mental-health-symptoms",
-    element: withLoadingProvider(MentalHealthSymptoms)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <MentalHealthSymptoms />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // AI Sound Analysis route - protected
   {
     path: "/ai-sound-analysis",
-    element: withLoadingProvider(AISoundAnalysis)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <AISoundAnalysis />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // Stress Level Assessment route - protected
   {
     path: "/stress-level-assessment",
-    element: withLoadingProvider(StressLevelAssessment)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <StressLevelAssessment />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // Expression Analysis route - protected
   {
     path: "/expression-analysis",
-    element: withLoadingProvider(ExpressionAnalysis)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <ExpressionAnalysis />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
+  // Mood Tracker route - protected
   {
     path: "/mood-tracker",
-    element: withLoadingProvider(MoodTracker)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <MoodTracker />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
-  // Mood Tracker Routes
+  // Mood Tracker Routes - all protected
   {
     path: "/mood",
-    element: withLoadingProvider(MoodOverview)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <MoodOverview />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
   {
     path: "/mood/stats",
-    element: withLoadingProvider(MoodStatistics)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <MoodStatistics />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
   {
     path: "/mood/:mood",
-    element: withLoadingProvider(MoodSelection)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <MoodSelection />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   },
   {
     path: "/mood/history",
-    element: withLoadingProvider(MoodHistory)(),
+    element: (
+      <LayoutWithProviders>
+        <ProtectedRoute>
+          <MoodHistory />
+        </ProtectedRoute>
+      </LayoutWithProviders>
+    )
   }
 ], {
   future: {

@@ -3,31 +3,64 @@ const config = require('../config/config');
 const User = require('../models/User');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const LocalStrategy = require('passport-local').Strategy;
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-exports.protect = async (req, res, next) => {
+// Configure Passport for session serialization
+passport.serializeUser((user, done) => {
+  console.log('Serializing user:', user._id);
+  done(null, user._id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  console.log('Deserializing user:', id);
   try {
-    let token;
-
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      token = req.headers.authorization.split(' ')[1];
+    // For our hardcoded user
+    if (id === '123456789') {
+      const user = {
+        _id: '123456789',
+        name: 'Pragat Mittal',
+        email: 'mittalpragat@gmail.com',
+        image: 'https://ui-avatars.com/api/?name=Pragat+Mittal'
+      };
+      return done(null, user);
     }
-
-    if (!token) {
-      return res.status(401).json({ message: 'Not authorized to access this route' });
-    }
-
-    // Verify token
-    const decoded = jwt.verify(token, config.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select('-password');
-    next();
+    
+    // For users from the database
+    const user = await User.findById(id);
+    done(null, user);
   } catch (error) {
-    res.status(401).json({ message: 'Not authorized to access this route' });
+    console.error('Error deserializing user:', error);
+    done(error, null);
   }
-};
+});
 
+// Local strategy for email/password login
+passport.use(new LocalStrategy(
+  { usernameField: 'email' },
+  async (email, password, done) => {
+    try {
+      const user = await User.findOne({ email });
+      
+      if (!user) {
+        return done(null, false, { message: 'Invalid credentials' });
+      }
+
+      const isMatch = await user.matchPassword(password);
+      if (!isMatch) {
+        return done(null, false, { message: 'Invalid credentials' });
+      }
+
+      return done(null, user);
+    } catch (error) {
+      return done(error);
+    }
+  }
+));
+
+// Google OAuth strategy
 passport.use(
   new GoogleStrategy(
     {
@@ -57,18 +90,5 @@ passport.use(
     }
   )
 );
-
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error, null);
-  }
-});
 
 module.exports = passport; 
