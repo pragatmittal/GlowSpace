@@ -245,7 +245,12 @@ export const AuthProvider = ({ children }) => {
   // Additional debugging to help identify authentication issues
   useEffect(() => {
     console.log('AuthContext state updated:', {
-      user: !!user,
+      user: user ? { 
+        _id: user._id, 
+        name: user.name, 
+        email: user.email,
+        image: !!user.image 
+      } : null,
       isAuthenticated: !!user,
       loading
     });

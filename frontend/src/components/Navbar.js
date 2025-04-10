@@ -1,3 +1,6 @@
+// DEPRECATED: This is a redundant file. Please use Navbar.jsx instead.
+// This file should be deleted after ensuring all imports reference Navbar.jsx correctly.
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import ImageWithFallback from './ImageWithFallback';
@@ -50,16 +53,6 @@ const Navbar = () => {
           ))}
         </div>
 
-        {/* CTA Button */}
-        <div className="hidden md:block">
-          <Link
-            to="/login"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-          >
-            Sign In
-          </Link>
-        </div>
-        
         {/* Mobile menu button */}
         <div className="md:hidden">
           <button
