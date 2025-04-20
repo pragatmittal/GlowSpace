@@ -73,41 +73,16 @@ class AssessmentController {
 
       // If all required assessments are completed, trigger AI analysis
       if (this.isAssessmentComplete(assessment)) {
-        try {
-          const analysis = await assessmentAnalysisService.processDailyAssessment(assessment);
-          assessment.freudScore = analysis.freudScore;
-          assessment.stressBreakdown = analysis.stressBreakdown;
-          await assessment.save();
-          
-          // Return the updated assessment with AI analysis
-          res.json({ 
-            success: true, 
-            assessment,
-            message: 'Assessment saved and AI analysis completed'
-          });
-        } catch (aiError) {
-          console.error('AI Analysis Error:', aiError);
-          // Still return success for the assessment save, but indicate AI analysis failed
-          res.json({ 
-            success: true, 
-            assessment,
-            message: 'Assessment saved, but AI analysis failed',
-            aiError: aiError.message
-          });
-        }
-      } else {
-        res.json({ 
-          success: true, 
-          assessment,
-          message: 'Assessment saved, waiting for more data'
-        });
+        const analysis = await assessmentAnalysisService.processDailyAssessment(assessment);
+        assessment.freudScore = analysis.freudScore;
+        assessment.stressBreakdown = analysis.stressBreakdown;
+        await assessment.save();
       }
+
+      res.json({ success: true, assessment });
     } catch (error) {
       console.error('Error saving assessment:', error);
-      res.status(500).json({ 
-        error: 'Failed to save assessment',
-        details: error.message 
-      });
+      res.status(500).json({ error: 'Failed to save assessment' });
     }
   }
 
@@ -176,20 +151,10 @@ class AssessmentController {
         .select('date freudScore')
         .sort({ date: 1 });
 
-      if (!assessments || assessments.length === 0) {
-        return res.status(404).json({ 
-          error: 'No Freud scores found',
-          message: 'Please complete your daily assessments to generate Freud scores'
-        });
-      }
-
       res.json(assessments);
     } catch (error) {
       console.error('Error getting Freud score:', error);
-      res.status(500).json({ 
-        error: 'Failed to get Freud score',
-        details: error.message 
-      });
+      res.status(500).json({ error: 'Failed to get Freud score' });
     }
   }
 
@@ -211,20 +176,10 @@ class AssessmentController {
         .select('date stressBreakdown')
         .sort({ date: 1 });
 
-      if (!assessments || assessments.length === 0) {
-        return res.status(404).json({ 
-          error: 'No stress breakdown data found',
-          message: 'Please complete your daily assessments to generate stress breakdown'
-        });
-      }
-
       res.json(assessments);
     } catch (error) {
       console.error('Error getting stress breakdown:', error);
-      res.status(500).json({ 
-        error: 'Failed to get stress breakdown',
-        details: error.message 
-      });
+      res.status(500).json({ error: 'Failed to get stress breakdown' });
     }
   }
 
@@ -244,40 +199,11 @@ class AssessmentController {
       'expressionAnalysis'
     ];
 
-    return requiredFields.every(field => {
-      const value = assessment[field];
-      if (!value) return false;
-      
-      // Check nested fields for complex objects
-      if (typeof value === 'object') {
-        switch (field) {
-          case 'professionalHelp':
-            return value.seekingHelp !== undefined;
-          case 'physicalDistress':
-            return value.level !== undefined;
-          case 'sleepQuality':
-            return value.rating !== undefined;
-          case 'medication':
-            return value.takingMedication !== undefined;
-          case 'mentalHealthSymptoms':
-            return value.anxiety !== undefined;
-          case 'stressLevel':
-            return value.currentLevel !== undefined;
-          case 'aiSoundAnalysis':
-            return value.mood !== undefined;
-          case 'expressionAnalysis':
-            return value.emotion !== undefined;
-          default:
-            return true;
-        }
-      }
-      
-      return true;
-    });
+    return requiredFields.every(field => assessment[field] !== undefined);
   }
 
   // Save assessment handlers
-  async saveGenderAssessment(req, res) {
+  saveGenderAssessment: async (req, res) => {
     try {
       const { gender } = req.body;
       await User.findByIdAndUpdate(req.user.id, { gender });
@@ -285,9 +211,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async saveAgeAssessment(req, res) {
+  saveAgeAssessment: async (req, res) => {
     try {
       const { age } = req.body;
       await User.findByIdAndUpdate(req.user.id, { age });
@@ -295,9 +221,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async saveWeightAssessment(req, res) {
+  saveWeightAssessment: async (req, res) => {
     try {
       const { weight } = req.body;
       await User.findByIdAndUpdate(req.user.id, { weight });
@@ -305,9 +231,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async saveProfessionalHelpAssessment(req, res) {
+  saveProfessionalHelpAssessment: async (req, res) => {
     try {
       const { seeking, previously, type } = req.body;
       await User.findByIdAndUpdate(req.user.id, {
@@ -322,9 +248,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async savePhysicalDistressAssessment(req, res) {
+  savePhysicalDistressAssessment: async (req, res) => {
     try {
       const { symptoms, severity, frequency } = req.body;
       await User.findByIdAndUpdate(req.user.id, {
@@ -339,9 +265,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async saveSleepQualityAssessment(req, res) {
+  saveSleepQualityAssessment: async (req, res) => {
     try {
       const { hoursSlept, qualityRating, issues } = req.body;
       await User.findByIdAndUpdate(req.user.id, {
@@ -356,9 +282,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async saveMedicationAssessment(req, res) {
+  saveMedicationAssessment: async (req, res) => {
     try {
       const { current, past, effects } = req.body;
       await User.findByIdAndUpdate(req.user.id, {
@@ -373,9 +299,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async saveMedicationSelection(req, res) {
+  saveMedicationSelection: async (req, res) => {
     try {
       const { current, past, effects } = req.body;
       await User.findByIdAndUpdate(req.user.id, {
@@ -390,9 +316,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async saveMentalHealthSymptoms(req, res) {
+  saveMentalHealthSymptoms: async (req, res) => {
     try {
       const { symptoms, severity, duration } = req.body;
       await User.findByIdAndUpdate(req.user.id, {
@@ -407,9 +333,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async saveStressLevelAssessment(req, res) {
+  saveStressLevelAssessment: async (req, res) => {
     try {
       const { level, symptoms, triggers } = req.body;
       await User.findByIdAndUpdate(req.user.id, {
@@ -424,9 +350,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async saveAISoundAnalysis(req, res) {
+  saveAISoundAnalysis: async (req, res) => {
     try {
       const { stressLevel, emotionalTone, analysisResult } = req.body;
       await User.findByIdAndUpdate(req.user.id, {
@@ -441,9 +367,9 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async saveExpressionAnalysis(req, res) {
+  saveExpressionAnalysis: async (req, res) => {
     try {
       const { dominantEmotion, confidenceScore, analysisResult } = req.body;
       await User.findByIdAndUpdate(req.user.id, {
@@ -458,119 +384,119 @@ class AssessmentController {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
   // Get assessment handlers
-  async getGenderAssessment(req, res) {
+  getGenderAssessment: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ gender: user.gender });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getAgeAssessment(req, res) {
+  getAgeAssessment: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ age: user.age });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getWeightAssessment(req, res) {
+  getWeightAssessment: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ weight: user.weight });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getProfessionalHelpAssessment(req, res) {
+  getProfessionalHelpAssessment: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ professionalHelp: user.assessments.professionalHelp });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getPhysicalDistressAssessment(req, res) {
+  getPhysicalDistressAssessment: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ physicalSymptoms: user.assessments.physicalSymptoms });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getSleepQualityAssessment(req, res) {
+  getSleepQualityAssessment: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ sleepQuality: user.assessments.sleepQuality });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getMedicationAssessment(req, res) {
+  getMedicationAssessment: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ medications: user.assessments.medications });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getMedicationSelection(req, res) {
+  getMedicationSelection: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ medications: user.assessments.medications });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getMentalHealthSymptoms(req, res) {
+  getMentalHealthSymptoms: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ mentalHealthSymptoms: user.assessments.mentalHealthSymptoms });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getStressLevelAssessment(req, res) {
+  getStressLevelAssessment: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ stressLevel: user.assessments.stressLevel });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getAISoundAnalysis(req, res) {
+  getAISoundAnalysis: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ soundAnalysis: user.assessments.soundAnalysis });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getExpressionAnalysis(req, res) {
+  getExpressionAnalysis: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       res.json({ expressionAnalysis: user.assessments.expressionAnalysis });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
   // Special AI analysis endpoints
-  async getFreudAIScore(req, res) {
+  getFreudAIScore: async (req, res) => {
     try {
       const user = await User.findById(req.user._id);
       const moodHistory = await getRecentMoodData(req.user._id);
@@ -595,9 +521,9 @@ class AssessmentController {
       console.error('Error getting Freud AI score:', error);
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getStressBreakdown(req, res) {
+  getStressBreakdown: async (req, res) => {
     try {
       const user = await User.findById(req.user._id);
       const sleepData = await getRecentSleepData(req.user._id);
@@ -624,9 +550,9 @@ class AssessmentController {
       console.error('Error getting stress breakdown:', error);
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getSleepStats(req, res) {
+  getSleepStats: async (req, res) => {
     try {
       const sleepData = await getRecentSleepData(req.user.id);
       const analysis = await openaiService.analyzeSleepAndStress(sleepData, {});
@@ -644,9 +570,9 @@ class AssessmentController {
       console.error('Error getting sleep stats:', error);
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
-  async getJournalStreak(req, res) {
+  getJournalStreak: async (req, res) => {
     try {
       const journalEntries = await getRecentJournalEntries(req.user.id);
       const analysis = await openaiService.analyzeJournalStreak(journalEntries);
@@ -663,10 +589,10 @@ class AssessmentController {
       console.error('Error getting journal streak:', error);
       res.status(500).json({ error: error.message });
     }
-  }
+  },
 
   // Dashboard summary endpoint
-  async getDashboardSummary(req, res) {
+  getDashboardSummary: async (req, res) => {
     try {
       const user = await User.findById(req.user.id);
       const moodHistory = await getRecentMoodData(req.user.id);

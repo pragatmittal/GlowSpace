@@ -19,14 +19,7 @@ try {
         create: async () => ({
           choices: [{
             message: {
-              content: JSON.stringify({
-                score: 50,
-                change: "stable",
-                daily_scores: {
-                  Mon: 50, Tue: 50, Wed: 50, Thu: 50, Fri: 50, Sat: 50, Sun: 50
-                },
-                summary: "AI analysis is currently unavailable. Please check your API configuration."
-              })
+              content: "AI analysis is currently unavailable. Please check your API configuration."
             }
           }]
         })
@@ -39,11 +32,6 @@ class AssessmentAnalysisService {
   // Generate Freud AI Score based on all assessment data
   async generateFreudScore(assessmentData) {
     try {
-      // Validate assessment data
-      if (!assessmentData || Object.keys(assessmentData).length === 0) {
-        throw new Error('No assessment data provided');
-      }
-
       const prompt = `Analyze the following comprehensive mental health assessment data and generate a Freud AI Score (0-100) that reflects the user's overall mental well-being:
 
 Assessment Data:
@@ -88,29 +76,16 @@ Please provide output in the following JSON format:
         max_tokens: 500
       });
 
-      const response = completion.choices[0].message.content.trim();
-      const parsedResponse = JSON.parse(response);
-
-      // Validate the response format
-      if (!this.validateFreudScoreResponse(parsedResponse)) {
-        throw new Error('Invalid Freud score response format');
-      }
-
-      return parsedResponse;
+      return JSON.parse(completion.choices[0].message.content.trim());
     } catch (error) {
       console.error('Error generating Freud score:', error);
-      throw new Error(`Failed to generate Freud score: ${error.message}`);
+      throw error;
     }
   }
 
   // Generate Stress Breakdown based on assessment data
   async generateStressBreakdown(assessmentData) {
     try {
-      // Validate assessment data
-      if (!assessmentData || Object.keys(assessmentData).length === 0) {
-        throw new Error('No assessment data provided');
-      }
-
       const prompt = `Analyze the following mental health assessment data and generate a detailed stress breakdown:
 
 Assessment Data:
@@ -152,18 +127,10 @@ Please provide output in the following JSON format:
         max_tokens: 500
       });
 
-      const response = completion.choices[0].message.content.trim();
-      const parsedResponse = JSON.parse(response);
-
-      // Validate the response format
-      if (!this.validateStressBreakdownResponse(parsedResponse)) {
-        throw new Error('Invalid stress breakdown response format');
-      }
-
-      return parsedResponse;
+      return JSON.parse(completion.choices[0].message.content.trim());
     } catch (error) {
       console.error('Error generating stress breakdown:', error);
-      throw new Error(`Failed to generate stress breakdown: ${error.message}`);
+      throw error;
     }
   }
 
@@ -182,38 +149,8 @@ Please provide output in the following JSON format:
       };
     } catch (error) {
       console.error('Error processing daily assessment:', error);
-      throw new Error(`Failed to process daily assessment: ${error.message}`);
+      throw error;
     }
-  }
-
-  // Helper method to validate Freud score response
-  validateFreudScoreResponse(response) {
-    return (
-      response &&
-      typeof response.score === 'number' &&
-      response.score >= 0 &&
-      response.score <= 100 &&
-      ['improved', 'declined', 'stable'].includes(response.change) &&
-      response.daily_scores &&
-      typeof response.summary === 'string'
-    );
-  }
-
-  // Helper method to validate stress breakdown response
-  validateStressBreakdownResponse(response) {
-    return (
-      response &&
-      Array.isArray(response.categories) &&
-      response.categories.every(category => 
-        typeof category.name === 'string' &&
-        typeof category.percentage === 'number' &&
-        typeof category.description === 'string'
-      ) &&
-      typeof response.totalStress === 'number' &&
-      response.totalStress >= 0 &&
-      response.totalStress <= 100 &&
-      Array.isArray(response.recommendations)
-    );
   }
 }
 

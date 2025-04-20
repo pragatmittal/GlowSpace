@@ -40,7 +40,6 @@ const StressChart = () => {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [stressData, setStressData] = useState([]);
 
   const fetchStressData = async () => {
     if (!user) {
@@ -58,21 +57,14 @@ const StressChart = () => {
       }
 
       const { breakdown } = response.data;
-      setStressData(breakdown);
-
-      // Format data for chart
       setChartData([
         { name: 'Low', value: breakdown.low || 0 },
         { name: 'Moderate', value: breakdown.moderate || 0 },
         { name: 'High', value: breakdown.high || 0 }
       ]);
     } catch (err) {
-      console.error('Error fetching stress breakdown:', err);
-      if (err.response?.status === 401) {
-        setError('Please log in to view your stress breakdown');
-      } else {
-        setError('Failed to load stress breakdown data');
-      }
+      console.error('Error fetching stress data:', err);
+      setError('Failed to load stress data');
     } finally {
       setLoading(false);
     }

@@ -54,7 +54,7 @@ const ScoreChart = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await api.get(`/assessment/freud-score`);
+      const response = await api.get(`/assessment/freud-ai-score`);
 
       if (!response.data || !response.data.score) {
         throw new Error('Invalid response format');
@@ -72,11 +72,7 @@ const ScoreChart = () => {
       setChartData(formattedData);
     } catch (err) {
       console.error('Error fetching Freud AI score:', err);
-      if (err.response?.status === 401) {
-        setError('Please log in to view your Freud AI score');
-      } else {
-        setError('Failed to load Freud AI score data');
-      }
+      setError('Failed to load Freud AI score data');
     } finally {
       setLoading(false);
     }
