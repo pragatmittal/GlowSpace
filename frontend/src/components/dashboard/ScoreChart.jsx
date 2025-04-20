@@ -12,50 +12,8 @@ import {
   AreaChart
 } from 'recharts';
 import { cn } from '../ui/utils';
-
-// Simulated data - in a real app, this would come from an API
-const generateChartData = (timeframe) => {
-  const baseLine = 95;
-  const data = [];
-  
-  if (timeframe === '1d') {
-    // Hourly data for 1 day
-    for (let i = 0; i < 24; i++) {
-      data.push({
-        time: `${i}:00`,
-        score: Math.max(85, Math.min(99, baseLine + Math.random() * 4 - 2)),
-      });
-    }
-  } else if (timeframe === '1w') {
-    // Daily data for 1 week
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    for (let i = 0; i < 7; i++) {
-      data.push({
-        time: days[i],
-        score: Math.max(85, Math.min(99, baseLine + Math.random() * 5 - 2.5)),
-      });
-    }
-  } else if (timeframe === '1m') {
-    // Weekly data for 1 month
-    for (let i = 1; i <= 4; i++) {
-      data.push({
-        time: `Week ${i}`,
-        score: Math.max(85, Math.min(99, baseLine + Math.random() * 6 - 3)),
-      });
-    }
-  } else {
-    // Monthly data for 1 year
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    for (let i = 0; i < 12; i++) {
-      data.push({
-        time: months[i],
-        score: Math.max(85, Math.min(99, baseLine + Math.random() * 7 - 3.5)),
-      });
-    }
-  }
-  
-  return data;
-};
+import { useAuth } from '../../context/AuthContext';
+import api from '../../config/api';
 
 const timeframeOptions = [
   { id: '1d', label: '1 Day' },
@@ -70,7 +28,7 @@ const CustomTooltip = ({ active, payload, label }) => {
       <div className="bg-white dark:bg-sidebar-dark p-3 rounded-lg shadow-lg">
         <p className="text-text-primary dark:text-text-dark-primary font-medium">{label}</p>
         <p className="text-chart-green font-bold">
-          Score: {parseFloat(payload[0].value).toFixed(3)}%
+          Score: {parseFloat(payload[0].value).toFixed(1)}%
         </p>
       </div>
     );
@@ -78,57 +36,107 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-export default function ScoreChart() {
-  const [selectedTimeframe, setSelectedTimeframe] = useState('1w');
+const ScoreChart = () => {
+  const { user } = useAuth();
+  const [selectedTimeframe, setSelectedTimeframe] = useState('week');
   const [chartData, setChartData] = useState([]);
-  const [score, setScore] = useState(97.245);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [score, setScore] = useState(0);
+  const [change, setChange] = useState('0%');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchFreudScore = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await api.get(`/assessment/freud-score`);
+
+      if (!response.data || !response.data.score) {
+        throw new Error('Invalid response format');
+      }
+
+      const { score, change, dailyScores } = response.data;
+      setScore(score);
+      setChange(change);
+
+      // Format data for chart
+      const formattedData = Object.entries(dailyScores).map(([day, value]) => ({
+        time: new Date(day).toLocaleDateString('en-US', { weekday: 'short' }),
+        score: value
+      }));
+      setChartData(formattedData);
+    } catch (err) {
+      console.error('Error fetching Freud AI score:', err);
+      if (err.response?.status === 401) {
+        setError('Please log in to view your Freud AI score');
+      } else {
+        setError('Failed to load Freud AI score data');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setChartData(generateChartData(selectedTimeframe));
-    
-    // Simulate real-time score updates
-    const interval = setInterval(() => {
-      setScore(prev => {
-        const newScore = Math.max(95, Math.min(99, prev + (Math.random() * 0.2 - 0.1)));
-        return parseFloat(newScore.toFixed(3));
-      });
-    }, 5000);
-    
-    return () => clearInterval(interval);
-  }, [selectedTimeframe]);
+    fetchFreudScore();
+  }, [selectedTimeframe, user]);
 
-  const handleTimeframeChange = (timeframe) => {
-    setIsAnimating(true);
-    setSelectedTimeframe(timeframe);
-    setTimeout(() => setIsAnimating(false), 600);
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-500 text-center">
+          <p className="font-semibold">Error loading Freud AI score</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
+      className={cn(
+        "rounded-lg p-6",
+        "bg-white dark:bg-gray-800 shadow-lg"
+      )}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={cn(
-        "bg-card dark:bg-card-dark rounded-2xl p-6",
-        "shadow-card hover:shadow-card-hover transition-shadow", 
-        "h-full"
-      )}
     >
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-text-primary dark:text-text-dark-primary">
-          Freud AI Score
-        </h3>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Freud AI Score</h2>
+          <div className="flex items-center mt-2">
+            <span className="text-3xl font-bold text-chart-green">{score.toFixed(1)}%</span>
+            <span className={cn(
+              "ml-2 text-sm font-medium",
+              change.startsWith('+') ? "text-green-500" : "text-red-500"
+            )}>
+              {change}
+            </span>
+          </div>
+        </div>
         <div className="flex space-x-2">
-          {timeframeOptions.map((option) => (
+          {timeframeOptions.map(option => (
             <button
               key={option.id}
-              onClick={() => handleTimeframeChange(option.id)}
+              onClick={() => setSelectedTimeframe(option.id)}
               className={cn(
-                "px-3 py-1 text-sm rounded-full transition-colors",
-                selectedTimeframe === option.id 
-                  ? "bg-chart-green text-white font-medium" 
-                  : "bg-white dark:bg-sidebar-dark text-text-secondary dark:text-text-dark-secondary hover:bg-gray-100 dark:hover:bg-sidebar"
+                "px-3 py-1 rounded-md text-sm font-medium transition-colors",
+                selectedTimeframe === option.id
+                  ? "bg-primary text-white"
+                  : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
               )}
             >
               {option.label}
@@ -137,78 +145,33 @@ export default function ScoreChart() {
         </div>
       </div>
 
-      <div className="flex items-start mb-5">
-        <motion.div
-          key={score}
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="mr-4"
-        >
-          <div className="text-text-secondary dark:text-text-dark-secondary">Current Score</div>
-          <div className="text-4xl font-bold text-text-primary dark:text-text-dark-primary">
-            {score}%
-          </div>
-        </motion.div>
-        
-        <div className="ml-6 flex items-center text-chart-green">
-          <svg 
-            xmlns="http://www.w3.org/2000/svg" 
-            className="h-5 w-5" 
-            viewBox="0 0 20 20" 
-            fill="currentColor"
-          >
-            <path 
-              fillRule="evenodd" 
-              d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" 
-              clipRule="evenodd" 
+      <div className="h-64">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis 
+              dataKey="time" 
+              stroke="#6b7280"
+              tick={{ fill: '#6b7280' }}
             />
-          </svg>
-          <span className="font-medium text-sm ml-1">+2.3%</span>
-          <span className="text-text-secondary dark:text-text-dark-secondary text-sm ml-1">vs last period</span>
-        </div>
-      </div>
-
-      <div className="h-64 w-full">
-        <motion.div
-          animate={isAnimating ? { opacity: [1, 0, 1] } : { opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          className="h-full w-full"
-        >
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#79A66D" stopOpacity={0.8}/>
-                  <stop offset="95%" stopColor="#79A66D" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E7E7E7" />
-              <XAxis 
-                dataKey="time" 
-                tick={{ fill: '#6D5B4B' }} 
-                tickLine={false}
-                axisLine={{ stroke: '#E7E7E7' }}
-              />
-              <YAxis 
-                domain={[85, 100]} 
-                tick={{ fill: '#6D5B4B' }} 
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `${value}%`}
-              />
-              <Tooltip content={<CustomTooltip />} />
-              <Area 
-                type="monotone" 
-                dataKey="score" 
-                stroke="#79A66D" 
-                fillOpacity={1}
-                fill="url(#scoreGradient)"
-                strokeWidth={3}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </motion.div>
+            <YAxis 
+              domain={[0, 100]}
+              stroke="#6b7280"
+              tick={{ fill: '#6b7280' }}
+            />
+            <Tooltip content={<CustomTooltip />} />
+            <Area
+              type="monotone"
+              dataKey="score"
+              stroke="#4CAF50"
+              fill="#4CAF50"
+              fillOpacity={0.2}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
       </div>
     </motion.div>
   );
-} 
+};
+
+export default ScoreChart; 

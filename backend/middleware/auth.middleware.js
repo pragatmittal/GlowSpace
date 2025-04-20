@@ -4,6 +4,7 @@ const User = require('../models/User');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const LocalStrategy = require('passport-local').Strategy;
+const JwtStrategy = require('./jwt.strategy');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -91,4 +92,34 @@ passport.use(
   )
 );
 
-module.exports = passport; 
+// JWT strategy
+passport.use('jwt', JwtStrategy);
+
+// Export both the passport configuration and the middleware functions
+module.exports = {
+  passport,
+  ensureAuth: (req, res, next) => {
+    // Check if user is authenticated via Passport
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    
+    // If not authenticated, return 401 Unauthorized
+    return res.status(401).json({
+      success: false,
+      error: 'Unauthorized. Please log in to access this resource.'
+    });
+  },
+  ensureGuest: (req, res, next) => {
+    // Check if user is NOT authenticated
+    if (!req.isAuthenticated()) {
+      return next();
+    }
+    
+    // If already authenticated, redirect to dashboard or home
+    return res.status(400).json({
+      success: false,
+      error: 'You are already logged in.'
+    });
+  }
+}; 

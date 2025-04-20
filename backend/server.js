@@ -1,12 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
-const passport = require('./middleware/auth.middleware');
+const passport = require('passport');
 const connectDB = require('./config/db');
 const dotenv = require('dotenv');
+require('./middleware/auth.middleware'); // Just require the file to set up passport strategies
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
+const moodRoutes = require('./routes/moodRoutes');
+const assessmentRoutes = require('./routes/assessment/assessmentRoutes.js');
+const analysisRoutes = require('./routes/analysisRoutes');
 
 // Config
 dotenv.config();
@@ -52,6 +56,24 @@ app.use((req, res, next) => {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/moods', moodRoutes);
+app.use('/api/assessment', assessmentRoutes);
+app.use('/api/analysis', analysisRoutes);
+
+// Dashboard endpoint for consolidated ML/AI metrics
+app.get('/api/dashboard', passport.authenticate('jwt', { session: false }), async (req, res) => {
+  try {
+    // Pass the request to the dashboard summary controller
+    const assessmentController = require('./controllers/assessmentController');
+    return assessmentController.getDashboardSummary(req, res);
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Error generating dashboard summary'
+    });
+  }
+});
 
 // Root route
 app.get('/', (req, res) => {
@@ -60,6 +82,15 @@ app.get('/', (req, res) => {
     status: 'online',
     authStatus: req.isAuthenticated() ? 'authenticated' : 'not authenticated',
     user: req.user || null
+  });
+});
+
+// API root route for connectivity checks
+app.get('/api', (req, res) => {
+  res.json({ 
+    message: 'GlowSpace API is online',
+    status: 'online',
+    timestamp: new Date().toISOString()
   });
 });
 

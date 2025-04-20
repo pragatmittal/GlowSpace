@@ -407,9 +407,9 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
       <RouterProvider router={router} />
-    </ErrorBoundary>
+      </ErrorBoundary>
   );
 }
 

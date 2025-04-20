@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 import { useAuth } from '../context/AuthContext';
-import { UserCircle, Bell, LogOut, Settings, User, RefreshCw, Camera, Upload, X, LayoutDashboard } from 'lucide-react';
+import { UserCircle, Bell, LogOut, Settings, User, RefreshCw, Camera, Upload, X, LayoutDashboard, Wifi, WifiOff } from 'lucide-react';
 import axios from 'axios';
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const { user, isAuthenticated, loading, logout, checkAuthStatus } = useAuth();
+  const { user, isAuthenticated, loading, logout, checkAuthStatus, forceLogout, isOffline, checkServerConnectivity } = useAuth();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
@@ -30,20 +30,13 @@ const Navbar = () => {
     });
   }, [user, isAuthenticated, loading]);
 
-  // Check authentication status on component mount
+  // Check authentication status only on initial mount, not on re-renders
   useEffect(() => {
-    // Force a refresh of authentication status when component mounts
-    const refreshOnMount = async () => {
-      console.log('Refreshing auth status on Navbar mount...');
-      try {
-        await checkAuthStatus();
-      } catch (error) {
-        console.error('Failed to refresh auth status on mount:', error);
-      }
-    };
-    
-    refreshOnMount();
-  }, [checkAuthStatus]);
+    // We'll log but skip the actual refresh since AuthContext already does this
+    console.log('Navbar mounted - auth status managed by AuthContext');
+    // Only refresh if explicitly needed for debugging
+    // Removed auto-refresh to prevent re-render loops
+  }, []); // Empty dependency array means this only runs once
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -160,8 +153,15 @@ const Navbar = () => {
     // Force re-evaluation of auth state for testing
     const userIsAuthenticated = !!user && isAuthenticated;
     
+    console.log('Auth State in Navbar:', { 
+      user: !!user, 
+      isAuthenticated, 
+      userIsAuthenticated,
+      loading
+    });
+    
     if (userIsAuthenticated) {
-      return (
+  return (
         <div className="flex items-center space-x-4" ref={dropdownRef}>
           <button 
             className="relative flex items-center"
@@ -195,8 +195,8 @@ const Navbar = () => {
               <div className="px-4 py-3 border-b border-gray-100">
                 <p className="text-sm font-medium text-gray-700">Signed in as</p>
                 <p className="text-sm font-semibold text-gray-900 truncate">{user?.email || 'User'}</p>
-              </div>
-              
+          </div>
+
               <div className="px-4 py-2 border-b border-gray-100">
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
@@ -226,126 +226,158 @@ const Navbar = () => {
                     </button>
                   </div>
                 </div>
-              </div>
-              
-              <button
+                </div>
+
+                  <button 
                 onClick={handleDashboardClick}
                 className="flex items-center w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 transition-colors"
               >
                 <LayoutDashboard className="mr-3 h-4 w-4 text-gray-500" />
                 Dashboard
-              </button>
-              
+                  </button>
+                  
               <Link to="/settings" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 transition-colors">
                 <Settings className="mr-3 h-4 w-4 text-gray-500" />
-                Settings
-              </Link>
+                        Settings
+                      </Link>
               
-              <hr className="my-1 border-gray-100" />
+                      <hr className="my-1 border-gray-100" />
               
-              <button
-                onClick={handleLogout}
+                      <button
+                        onClick={handleLogout}
                 className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-              >
+                      >
                 <LogOut className="mr-3 h-4 w-4 text-red-500" />
-                Sign out
-              </button>
-            </div>
-          )}
-        </div>
+                        Sign out
+                      </button>
+                    </div>
+                  )}
+                </div>
       );
     } else {
-      return (
-        <div className="flex items-center space-x-4">
-          {/* Sign In button removed */}
-        </div>
-      );
+      // Return empty container when not authenticated
+      return null;
+    }
+  };
+
+  // Handle connection check
+  const handleConnectionCheck = async () => {
+    setIsRefreshing(true);
+    try {
+      const isConnected = await checkServerConnectivity();
+      if (isConnected) {
+        // If connection is restored, refresh auth status
+        await checkAuthStatus();
+      }
+    } catch (error) {
+      console.error('Connection check failed:', error);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
   return (
-    <nav className="bg-white shadow-md py-4">
-      <div className="container mx-auto px-4 flex justify-between items-center">
-        {/* Logo */}
-        <Link to="/" className="flex items-center">
-          <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
-            GlowSpace
-          </span>
-        </Link>
-        
-        {/* Desktop navigation */}
-        <div className="hidden md:flex md:space-x-8">
-          <Link to="/" className={`text-gray-700 hover:text-indigo-600 px-3 py-2 font-medium transition-colors ${location.pathname === '/' ? 'border-b-2 border-indigo-600' : ''}`}>
-            Home
-          </Link>
-          <Link to="/services" className={`text-gray-700 hover:text-indigo-600 px-3 py-2 font-medium transition-colors ${location.pathname === '/services' ? 'border-b-2 border-indigo-600' : ''}`}>
-            Services
-          </Link>
-          <Link to="/about" className={`text-gray-700 hover:text-indigo-600 px-3 py-2 font-medium transition-colors ${location.pathname === '/about' ? 'border-b-2 border-indigo-600' : ''}`}>
-            About
-          </Link>
-          <Link to="/contact" className={`text-gray-700 hover:text-indigo-600 px-3 py-2 font-medium transition-colors ${location.pathname === '/contact' ? 'border-b-2 border-indigo-600' : ''}`}>
-            Contact
-          </Link>
-        </div>
+    <header className="bg-white shadow z-50 relative">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          {/* Left side */}
+          <div className="flex items-center">
+            {/* Logo */}
+            <Link to="/" className="flex-shrink-0 flex items-center">
+              <span className="text-2xl font-bold text-[#553C2E] tracking-tighter">GlowSpace</span>
+            </Link>
 
-        {/* Logout Button - only visible when authenticated */}
-        {isAuthenticated && (
-          <button
-            onClick={handleLogout}
-            className="hidden md:flex items-center px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-md font-medium transition-colors mr-2"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </button>
-        )}
+            {/* Navigation Links */}
+            <nav className="hidden md:ml-10 md:flex space-x-8">
+              <Link to="/" className="px-3 py-2 rounded-md text-[#553C2E] hover:text-purple-500 hover:bg-gray-50 font-medium text-sm">
+                Home
+              </Link>
+              <Link to="/about" className="px-3 py-2 rounded-md text-[#553C2E] hover:text-purple-500 hover:bg-gray-50 font-medium text-sm">
+                About
+              </Link>
+              <Link to="/contact" className="px-3 py-2 rounded-md text-[#553C2E] hover:text-purple-500 hover:bg-gray-50 font-medium text-sm">
+                Contact
+              </Link>
+              {!isAuthenticated && (
+                <Link to="/auth/sign-in" className="px-3 py-2 rounded-md text-[#553C2E] hover:text-purple-500 hover:bg-gray-50 font-medium text-sm">
+                Sign In
+              </Link>
+            )}
+            </nav>
+          </div>
 
-        {/* Auth debug status - only for development */}
-        <div className="hidden md:flex items-center px-3 py-1 mx-2 text-xs bg-gray-100 rounded-md">
-          <span className="mr-1">Auth:</span>
-          {isAuthenticated ? 
-            <span className="text-green-600 font-medium">Authenticated</span> : 
-            <span className="text-red-600 font-medium">Not Authenticated</span>
-          }
-          {loading && <span className="ml-1 text-blue-500">(Loading...)</span>}
-          <button 
-            onClick={refreshAuthStatus}
-            className="ml-2 text-blue-600 hover:text-blue-800 transition-colors" 
-            disabled={isRefreshing}
-            title="Refresh authentication status"
-          >
-            <RefreshCw className={`h-3 w-3 ${isRefreshing ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
+          {/* Right side */}
+          <div className="flex items-center">
+            {/* Offline indicator */}
+            {isOffline && (
+              <div className="mr-4 px-3 py-1 rounded-full bg-amber-100 text-amber-800 flex items-center text-xs font-medium">
+                <WifiOff size={14} className="mr-1" />
+                <span>Offline</span>
+                <button 
+                  onClick={handleConnectionCheck}
+                  className="ml-1 p-1 hover:bg-amber-200 rounded-full"
+                  title="Try reconnecting"
+                  disabled={isRefreshing}
+                >
+                  <RefreshCw size={12} className={isRefreshing ? 'animate-spin' : ''} />
+                </button>
+              </div>
+            )}
 
-        {/* Right side section - Authentication UI */}
-        <div className="relative">
-          {renderAuthSection()}
-        </div>
+            {/* Debug bar */}
+            <div className="mr-4 hidden md:flex space-x-2">
+              <div className="px-2 py-1 rounded bg-gray-100 flex items-center text-xs">
+                <button
+                  onClick={refreshAuthStatus}
+                  disabled={isRefreshing}
+                  className="text-gray-600 flex items-center space-x-1 hover:text-indigo-600"
+                >
+                  <RefreshCw size={14} className={isRefreshing ? 'animate-spin' : ''} />
+                  <span>Refresh Auth</span>
+                </button>
+              </div>
+              <div className="px-2 py-1 rounded bg-gray-100 flex items-center text-xs">
+                <button
+                  onClick={forceLogout}
+                  className="text-red-600 flex items-center space-x-1 hover:text-red-800"
+                >
+                  <LogOut size={14} />
+                  <span>Force Logout</span>
+                </button>
+              </div>
+              <div className="px-2 py-1 rounded bg-gray-100 flex items-center text-xs">
+                <button
+                  onClick={() => {
+                    localStorage.clear();
+                    window.location.reload();
+                  }}
+                  className="text-gray-600 flex items-center space-x-1 hover:text-gray-800"
+                >
+                  <X size={14} />
+                  <span>Clear Storage & Reload</span>
+                </button>
+              </div>
+            </div>
 
-        {/* Mobile menu button */}
-        <div className="md:hidden">
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="bg-white rounded-md p-2 inline-flex items-center justify-center text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500"
-          >
-            <span className="sr-only">Open menu</span>
-            <svg
-              className="h-6 w-6"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </button>
+            {/* Auth section */}
+            {renderAuthSection()}
+
+          {/* Mobile menu button */}
+            <div className="flex md:hidden">
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-gray-900 hover:bg-gray-100 focus:outline-none"
+              >
+                <span className="sr-only">Open main menu</span>
+                <svg className={`h-6 w-6 ${isMobileMenuOpen ? 'hidden' : 'block'}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+                <svg className={`h-6 w-6 ${isMobileMenuOpen ? 'block' : 'hidden'}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -441,13 +473,22 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                {/* Sign In button removed */}
+                {/* Sign In button for mobile menu */}
+                <hr className="my-2" />
+              <Link 
+                  to="/auth/sign-in" 
+                  className="flex items-center text-indigo-600 hover:text-indigo-700 px-3 py-2 rounded-md font-medium transition-colors"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                  <User className="mr-2 h-4 w-4" />
+                Sign In
+              </Link>
               </>
             )}
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 };
 

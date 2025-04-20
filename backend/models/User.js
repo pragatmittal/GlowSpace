@@ -28,6 +28,71 @@ const userSchema = new mongoose.Schema({
   providerId: {
     type: String,
     // Not required for email login
+  },
+  gender: {
+    type: String,
+    enum: ['male', 'female', 'non-binary', 'prefer_not_to_say', 'other'],
+    default: 'prefer_not_to_say'
+  },
+  age: {
+    type: Number,
+    min: 13,
+    max: 120
+  },
+  weight: {
+    type: Number,
+    min: 30,
+    max: 500
+  },
+  assessments: {
+    sleepQuality: {
+      hoursSlept: Number,
+      qualityRating: String,
+      issues: [String],
+      updatedAt: Date
+    },
+    physicalSymptoms: {
+      symptoms: [String],
+      severity: String,
+      frequency: String,
+      updatedAt: Date
+    },
+    stressLevel: {
+      level: String,
+      symptoms: [String],
+      triggers: [String],
+      updatedAt: Date
+    },
+    medications: {
+      current: [String],
+      past: [String],
+      effects: [String],
+      updatedAt: Date
+    },
+    professionalHelp: {
+      seeking: Boolean,
+      previously: Boolean,
+      type: String,
+      updatedAt: Date
+    },
+    mentalHealthSymptoms: {
+      symptoms: [String],
+      severity: String,
+      duration: String,
+      updatedAt: Date
+    },
+    soundAnalysis: {
+      stressLevel: Number,
+      emotionalTone: String,
+      analysisResult: Object,
+      updatedAt: Date
+    },
+    expressionAnalysis: {
+      dominantEmotion: String,
+      confidenceScore: Number,
+      analysisResult: Object,
+      updatedAt: Date
+    }
   }
 }, {
   timestamps: true
